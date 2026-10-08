@@ -5,3 +5,13 @@ scikit-learn
 tensorflow
 joblib
 xgboost
+markdown
+xhtml2pdf
+langchain-text-splitters
+transformers
+langchain-community
+langchain-chroma
+langchain-core
+torch
+sentence-transformers
+chromadb

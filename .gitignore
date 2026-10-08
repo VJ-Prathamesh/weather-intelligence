@@ -4,3 +4,12 @@ __pycache__/
 .env
 models/best_lstm.keras
 venv/
+chromadb, 
+sentence-transformers, 
+langchain-text-splitters. 
+vectorstore/
+/src/predict.py
+/src/export_pdfs.py
+
+
+
