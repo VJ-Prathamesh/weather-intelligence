@@ -1,18 +1,18 @@
 name: Agent-and-API
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "Agent/**"
-      - "weather_backend/**"
-      - "vectorstore/**"
-      - "requirements.txt"
-      - "Dockerfile"
-      - ".github/workflows/agent-training.yml"
-  workflow_run:                   # a new model was just uploaded: rebuild the image with it
-    workflows: ["Model-Training"]
-    types: [completed]
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - "Agent/**"
+  #     - "weather_backend/**"
+  #     - "vectorstore/**"
+  #     - "requirements.txt"
+  #     - "Dockerfile"
+  #     - ".github/workflows/agent-training.yml"
+  # workflow_run:                   # a new model was just uploaded: rebuild the image with it
+  #   workflows: ["Model-Training"]
+  #   types: [completed]
   workflow_dispatch:
 
 concurrency:
@@ -38,7 +38,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ap-south-1
 
       - name: Fetch the latest model from S3
         run: |
