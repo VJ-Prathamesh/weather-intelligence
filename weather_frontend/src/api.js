@@ -1,4 +1,4 @@
-const BASE = "http://13.203.199.191:8000"  
+const BASE = "/api"
 
 export async function sendMessage(message, threadId) {
   let response;
