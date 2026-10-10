@@ -1,18 +1,18 @@
 name: Agent-and-API
 
 on:
-  # push:
-  #   branches: [main]
-  #   paths:
-  #     - "Agent/**"
-  #     - "weather_backend/**"
-  #     - "vectorstore/**"
-  #     - "requirements.txt"
-  #     - "Dockerfile"
-  #     - ".github/workflows/agent-training.yml"
-  # workflow_run:                   # a new model was just uploaded: rebuild the image with it
-  #   workflows: ["Model-Training"]
-  #   types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - "Agent/**"
+      - "weather_backend/**"
+      - "vectorstore/**"
+      - "requirements.txt"
+      - "Dockerfile"
+      - ".github/workflows/agent-training.yml"
+  workflow_run:                   # a new model was just uploaded: rebuild the image with it
+    workflows: ["Model-Training"]
+    types: [completed]
   workflow_dispatch:
 
 concurrency:
