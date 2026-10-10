@@ -1,0 +1,14 @@
+.git/
+.github/
+venv/
+**/__pycache__/
+.env
+src/
+config/
+data/
+artifacts/
+models/
+RAG_pipeline/
+weather_frontend/
+*.ipynb
+requirements-train.txt

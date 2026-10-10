@@ -1,7 +1,5 @@
 
-from pyexpat.errors import messages
 
-from distro import name
 from langchain_core.embeddings import Embeddings
 from fastembed import TextEmbedding
 
@@ -24,9 +22,8 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import interrupt, Command
 import requests
 from langchain_core.messages import AIMessageChunk
-from pyexpat.errors import messages
-from distro import name
 from datetime import date
+import os
 
 
 
@@ -232,7 +229,7 @@ def find_place(name):
 @tool
 def get_forecast_api(city:str, days:int)->str:
     """
-    this tool capable to predict the weather forecast like rain,wind humidity and presssure.
+    this tool capable to predict the weather forecast like rain,wind humidity and presssure not suitable for temperature prediction of Pune, Delhi and Kolkata city only other than that it can predict for all cities.
     
     Arguments:
     -city: The city for which to get the forecast the weather example other any city than Delhi, Pune or Kolkata because LSTM Model will predict it according.
@@ -315,6 +312,7 @@ SYSTEM_TEXT = (
     "If the user did not provide enough information for tool calling (or another detail a tool needs), call ask_user to ask. Never guess a any value that needed for tool calling."
     "also You are AI BOT Assistance who can help user to solve his general queries but make sure you are suppose to solve user query not to perform any task which are unrelavenet to your capabilities. if user ask simple query related then answer if it ask any other different questions like coding or any othre domain like games or Medical or other domain simply answer that you are not capable to solve this query and you are only capable to solve weather related queries, bt make sure that your tasks is also  to use engage with user if he asks some questions on it. your tasks is not only for the weather also some engagement for user. to understand betterly some technical term related to weather as ChatGPT does"
     "Past weather (search_kb) and the get_forecast_lstm temperature forecast exist only for Delhi, Pune and Kolkata. get_forecast_api works for any city in the world."
+    "and if output is unstructured make in in structured format user readable, same for table related data too"
 )    
 
 def chatbot(state:MessagesState)->dict:
@@ -349,55 +347,41 @@ config={"configurable":{"thread_id":"thread_1"}}
 
 
 
-
-
-def run_agent(question):
-    # if the thread is paused waiting for an answer, this text IS the answer; otherwise it is a new question
-    if graph.get_state(config).interrupts:
+def run_agent(question, thread_id="thread_1"):
+    config = {"configurable": {"thread_id": thread_id}, "recursion_limit": 25}
+    response = ""
+    if graph.get_state(config).interrupts:                 # waiting for an answer: this text is the answer
         inputs = Command(resume=question)
     else:
         inputs = {"messages": [HumanMessage(content=question)]}
 
-    while True:
-        for mode, data in graph.stream(inputs, config, stream_mode=["messages", "updates"]):
-            if mode == "messages":                                   # the model typing, token by token
-                chunk, meta = data
-                if meta["langgraph_node"] == "chatbot" and chunk.content:
-                    print(chunk.content, end="", flush=True)
-            else:                                                    # a whole node just finished
-                for node, update in data.items():
-                    if node == "chatbot":
-                        for call in update["messages"][-1].tool_calls:
-                            if call["name"] != "ask_user":
-                                print(f"\n[calling {call['name']} {call['args']}]")
-                    elif node == "tools":
-                        for m in update["messages"]:
-                            print(f"[{m.name} finished]")
+    for mode, data in graph.stream(inputs, config, stream_mode=["messages", "updates"]):
+        if mode == "messages":                             # collect the model's text
+            chunk, meta = data
+            if meta["langgraph_node"] == "chatbot" and chunk.content:
+                response += chunk.content
+        else:                                              # tool events (shown on the server console)
+            for node, update in data.items():
+                if node == "chatbot":
+                    for call in update["messages"][-1].tool_calls:
+                        if call["name"] != "ask_user":
+                            print(f"[calling {call['name']} {call['args']}]")
+                elif node == "tools":
+                    for m in update["messages"]:
+                        print(f"[{m.name} finished]")
 
-        paused = graph.get_state(config).interrupts                  # did ask_user pause the graph?
-        if not paused:
-            break
-        print("\nAI asks:", paused[0].value)
-        inputs = Command(resume=input("You: "))
-    print()
+    paused = graph.get_state(config).interrupts            # ask_user stopped the graph
+    if paused:
+        return {"status": "needs_input", "question": paused[0].value}
+    return {"status": "done", "answer": response}
 
-                    
 
+def orchastrator(message: str, thread_id: str = "thread_1") -> dict:
+    return run_agent(message, thread_id)
 
 
 
 
-def main():
-    
-    while True:
-        question=input("You:")
-        if question.lower() in ["exit", "quit"]:
-            break
-        else:
-            run_agent(question)
-
-
-main()
 
 
 
