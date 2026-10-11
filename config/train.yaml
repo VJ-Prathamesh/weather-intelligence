@@ -1,6 +1,6 @@
 # Training settings for the forecast model (LSTM).
 # Every value comes from weather_training.ipynb, except where a comment says otherwise.
-# Change a value here instead of editing code; the training script reads this file.
+# Change  value here instead of editing code; the training script reads this file.
 
 data:
   raw_dir: data/raw            # one CSV per city, named <City>_weather.csv

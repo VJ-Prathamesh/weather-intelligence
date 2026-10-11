@@ -38,6 +38,7 @@ VECTOR_DIR = str(BASE_DIR / "vectorstore" / "chroma")
 
 # ---- constants
 CITIES = ["Delhi", "Pune", "Kolkata"]
+# update to use all
 CITY_COORDS = {
     "Delhi":   (28.576448, 77.18678),
     "Pune":    (18.523726, 73.86876),
@@ -160,6 +161,7 @@ def search_kb(
 @tool
 def get_forecast_lstm(city: Literal["Delhi", "Pune", "Kolkata"]) -> str:    
     """
+    redline :: if query is related to the temprature of tomorrow or predict the forecast of temprature related thing for 7 days. call this tool only not other one for temprature related predictions for city of the Delhi", "Pune", "Kolkata only.
     this tool predic the accurate 7-day weather forecast for Delhi, Pune or Kolkata.
     Returns a JSON table with 'date' and 'pred_temp_max_C'.
     "temperature forecast only (daily maximum)". It gives no rain, wind or minimum temperature and other informations

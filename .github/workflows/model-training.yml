@@ -2,7 +2,7 @@ name: Model-Training
 
 on:
   push:
-    branches: [main]
+    branches: [models]
     paths:
       - "src/**"
       - "config/train.yaml"
