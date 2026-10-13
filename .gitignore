@@ -11,3 +11,6 @@ models/*.keras
 models/scaler.pkl
 models/config.json
 models/metrics.json
+mlflow.db
+mlartifacts/
+mlruns/

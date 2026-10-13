@@ -1,0 +1,53 @@
+name: Upload-Model
+
+on:
+  push:
+    branches: [models]
+    paths:
+      - "production_model/**"
+  workflow_dispatch:
+
+concurrency:
+  group: model-and-image
+  cancel-in-progress: false
+
+permissions:
+  contents: write          
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check the approved model 
+        run: |
+          for file in lstm_weather_model.keras scaler.pkl config.json metrics.json; do
+            test -s "production_model/$file" || { echo "Missing: $file"; exit 1; }
+          done
+          python3 -m src.gate production_model
+
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Upload to S3 (this becomes the live model)
+        run: |
+          aws s3 sync production_model/ "s3://${{ secrets.AWS_S3_BUCKET }}/latest_model/" \
+            --delete --only-show-errors
+
+      - name: Remove the model folder from the repository
+        run: |
+          git config user.name "VJ-Prathamesh"
+          git config user.email "prathmesh.jadhav@cctech.co.in"
+          git rm -r --quiet production_model
+          git commit -m "Remove uploaded model folder [skip ci]"
+          git pull --rebase origin "${{ github.ref_name }}"
+          git push origin "HEAD:${{ github.ref_name }}"
+

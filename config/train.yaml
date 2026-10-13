@@ -27,10 +27,10 @@ model:                         # NOT in the notebook: recovered from models/lstm
 training:
   epochs: 100
   batch_size: 32
-  early_stopping_patience: 10  # stops when val_loss has not improved for 10 epochs, keeps the best weights
+  early_stopping_patience: 10  
   reduce_lr_factor: 0.5
   reduce_lr_patience: 5
-  seed: 42                     # NEW: the notebook set no seed, so exact numbers will differ slightly between runs
+  seed: 42                    
 
 output:
   # Step 1: write a finished bundle (model, scaler, config.json, metrics.json) into this folder.

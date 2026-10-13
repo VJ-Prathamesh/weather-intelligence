@@ -22,10 +22,10 @@ def make_windows(data_df, features, window, horizon):
     X = []
     y = []
     for city in data_df["city"].unique():
-        values = data_df[data_df["city"] == city][features].values   # this city only, as numbers
+        values = data_df[data_df["city"] == city][features].values   
 
         for i in range(len(values) - window - horizon + 1):
-            X.append(values[i : i + window])                        # past days, all features
-            y.append(values[i + window : i + window + horizon, 0])  # next days, temp_max only (column 0)
+            X.append(values[i : i + window])                       
+            y.append(values[i + window : i + window + horizon, 0]) 
 
     return np.array(X), np.array(y)

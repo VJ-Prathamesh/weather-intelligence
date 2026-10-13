@@ -1,0 +1,38 @@
+# Training settings for the forecast model (LSTM).
+# Every value comes from weather_training.ipynb, except where a comment says otherwise.
+# Change  value here instead of editing code; the training script reads this file.
+
+data:
+  raw_dir: data/raw            # one CSV per city, named <City>_weather.csv
+  skip_rows: 3                 # metadata lines at the top of every CSV
+  columns: [date, temp_max, temp_min, precip, wind_max, humidity, pressure, weathercode]
+  cities: all                  # "all" = every CSV in raw_dir (8 cities); or a list such as [Delhi, Pune]
+
+features: [temp_max, temp_min, precip, wind_max, humidity, pressure, weathercode]   # order matters
+target: temp_max               # the model predicts this column (it must be features[0])
+window: 45                     # days of history the model reads
+horizon: 7                     # days it predicts
+
+split:                         # in date order, separately for each city (no shuffling)
+  train: 0.70
+  val: 0.15                    # the test set is everything after train + val (0.15)
+
+model:                         # NOT in the notebook: recovered from models/lstm_weather_model.keras
+  lstm_units: [64, 32]         # two LSTM layers; the first returns sequences
+  dropout: 0.2                 # after each LSTM layer
+  optimizer: adam
+  learning_rate: 0.001         # inferred: the saved file ends at 9.77e-07, which is 0.001 halved 10 times
+  loss: mse                    # the output layer is Dense(horizon), linear
+
+training:
+  epochs: 30
+  batch_size: 15
+  early_stopping_patience: 10  
+  reduce_lr_factor: 0.5
+  reduce_lr_patience: 5
+  seed: 42                    
+
+output:
+  # Step 1: write a finished bundle (model, scaler, config.json, metrics.json) into this folder.
+  # Step 3 will turn it into versioned folders (forecast-model/v1, v2, ...).
+  dir: artifacts/forecast-model/_work

@@ -6,7 +6,8 @@ MODEL_DIR = "artifacts/forecast-model/_work"
 
 
 def main():
-    model_dir =  MODEL_DIR
+    model_dir = sys.argv[1] if len(sys.argv) > 1 else MODEL_DIR
+
     with open(os.path.join(model_dir, "metrics.json")) as f:
         metrics = json.load(f)
 

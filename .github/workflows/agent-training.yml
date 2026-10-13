@@ -1,31 +1,20 @@
 name: Agent-and-API
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "Agent/**"
-      - "weather_backend/**"
-      - "vectorstore/**"
-      - "requirements.txt"
-      - "Dockerfile"
-      - ".github/workflows/agent-training.yml"
-  workflow_run:                   # a new model was just uploaded: rebuild the image with it
-    workflows: ["Model-Training"]
-    types: [completed]
   workflow_dispatch:
 
 concurrency:
-  group: model-and-image          # never runs at the same time as Model-Training
+  group: model-and-image
   cancel-in-progress: false
 
 permissions:
   contents: read
 
+
 jobs:
   build-and-deploy:
-    # when started by the model pipeline, continue only if that run succeeded
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    # # when started by the model pipeline, continue only if that run succeeded
+    # if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
 

@@ -27,7 +27,6 @@ import os
 
 
 
-# ================= STEP 2: config and shared resources =================
 load_dotenv()
 
 # ---- paths (built from this file's location, so it runs from any folder)
@@ -36,9 +35,8 @@ MODELS_DIR = BASE_DIR / "models"
 DATA_DIR   = BASE_DIR / "data" / "raw"
 VECTOR_DIR = str(BASE_DIR / "vectorstore" / "chroma")
 
-# ---- constants
 CITIES = ["Delhi", "Pune", "Kolkata"]
-# update to use all
+
 CITY_COORDS = {
     "Delhi":   (28.576448, 77.18678),
     "Pune":    (18.523726, 73.86876),
@@ -51,7 +49,6 @@ EMBED_MODEL       = "BAAI/bge-small-en-v1.5"
 QUERY_INSTRUCTION = "Represent this sentence for searching relevant passages: "
 COLLECTION        = "weather_kb"
 
-# ---- embedding model (same settings as the notebook)
 class FastEmbedBGE(Embeddings):
     """bge-small through ONNX: same vectors as the PyTorch version, no torch needed."""
     def __init__(self, model_name, query_instruction, cache_dir):
@@ -72,24 +69,21 @@ embedding_model = FastEmbedBGE(
 )
 
 
-# ---- open the existing Chroma store (do NOT rebuild it here)
 vectorstore = Chroma(
     collection_name=COLLECTION,
     persist_directory=VECTOR_DIR,
     embedding_function=embedding_model,
 )
 
-# ---- LSTM model, scaler and its settings
 lstm_model = load_model(str(MODELS_DIR / "lstm_weather_model.keras"))
 scaler = joblib.load(MODELS_DIR / "scaler.pkl")
 with open(MODELS_DIR / "config.json") as f:
     config = json.load(f)
 
-FEATURES = config["features"]      # column order matters
-WINDOW   = config["window"]        # 30
-HORIZON  = config["horizon"]       # 7
+FEATURES = config["features"]      
+WINDOW   = config["window"]        
+HORIZON  = config["horizon"]       
 
-# to convert a scaled temp_max prediction back to degrees C
 T_MIN   = scaler.data_min_[0]
 T_RANGE = scaler.data_max_[0] - scaler.data_min_[0]
 
@@ -352,7 +346,7 @@ config={"configurable":{"thread_id":"thread_1"}}
 def run_agent(question, thread_id="thread_1"):
     config = {"configurable": {"thread_id": thread_id}, "recursion_limit": 25}
     response = ""
-    if graph.get_state(config).interrupts:                 # waiting for an answer: this text is the answer
+    if graph.get_state(config).interrupts:                 
         inputs = Command(resume=question)
     else:
         inputs = {"messages": [HumanMessage(content=question)]}
@@ -362,7 +356,7 @@ def run_agent(question, thread_id="thread_1"):
             chunk, meta = data
             if meta["langgraph_node"] == "chatbot" and chunk.content:
                 response += chunk.content
-        else:                                              # tool events (shown on the server console)
+        else:                                             
             for node, update in data.items():
                 if node == "chatbot":
                     for call in update["messages"][-1].tool_calls:
@@ -372,7 +366,7 @@ def run_agent(question, thread_id="thread_1"):
                     for m in update["messages"]:
                         print(f"[{m.name} finished]")
 
-    paused = graph.get_state(config).interrupts            # ask_user stopped the graph
+    paused = graph.get_state(config).interrupts           
     if paused:
         return {"status": "needs_input", "question": paused[0].value}
     return {"status": "done", "answer": response}
